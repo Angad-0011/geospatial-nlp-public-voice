@@ -11,7 +11,8 @@ from nltk import download as nltk_download
 from nltk.corpus import stopwords
 
 from config import CITIES, FAST_MODE, PROC_DIR, RAW_DIR, SPACY_MODEL_SMALL
-from utils_io import log, load_parquet, save_parquet
+from utils_io import log, load_df, save_df
+
 
 CLEAN_REGEX = re.compile(r"https?://\S+|www\.\S+")
 PUNCT_REGEX = re.compile(r"[^A-Za-z0-9\s]")
@@ -93,20 +94,20 @@ def preprocess_data(reddit_path: Path | None = None, news_path: Path | None = No
 
     frames: List[pd.DataFrame] = []
     for path in filter(None, [reddit_path, news_path]):
-        frames.append(load_parquet(path))
+        frames.append(load_df(path))
 
     if not frames:
         raw_files = sorted(RAW_DIR.glob("*.parquet"))
         if not raw_files:
             raise FileNotFoundError("No raw data available for preprocessing")
-        frames = [load_parquet(path) for path in raw_files]
+        frames = [load_df(path) for path in raw_files]
 
     df = preprocess_frames(frames)
     corpus_path = PROC_DIR / "corpus.parquet"
-    save_parquet(df, corpus_path)
+    save_df(df, corpus_path)
     small_path = PROC_DIR / "corpus_small.parquet"
     columns = [col for col in ["platform", "title", "lemma_text", "city", "url"] if col in df.columns]
-    save_parquet(df[columns], small_path)
+    save_df(df[columns], small_path)
     return corpus_path
 
 

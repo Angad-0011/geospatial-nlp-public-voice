@@ -4,6 +4,9 @@ import pytest
 
 import preprocess
 
+from utils_io import load_df, save_df
+
+
 
 class DummyToken:
     def __init__(self, text, lemma):

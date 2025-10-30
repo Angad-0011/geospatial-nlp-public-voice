@@ -1,9 +1,13 @@
 from pathlib import Path
 
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import pandas as pd
 import pytest
 
-from utils_io import load_parquet
+from utils_io import load_df
+
 from config import BASE_DIR
 
 
