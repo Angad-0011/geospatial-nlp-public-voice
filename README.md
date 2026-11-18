@@ -1,8 +1,15 @@
-# geospatial_nlp_project
+# Geospatial NLP Public Voice
 
-City-wise public discourse analysis for Reddit and news content with NLP pipelines, topic modeling, and search.
+A Python prototype for exploring how local issues appear in Reddit discussions and news coverage. It tags documents by city, builds a searchable corpus, and presents topic and sentiment signals alongside semantic search. Results describe the corpus, not public opinion as a whole.
+
+## Data sources
+
+- **Sample mode:** reads the two checked-in Parquet fixtures, `data/sample/sample_reddit.parquet` and `data/sample/sample_news.parquet`. Their record-level provenance and redistribution rights are not documented here; don't assume these files are synthetic or licensed for reuse.
+- **Live mode:** runs a configured Reddit search and fetches news from configured sources, which default to The Hindu, The Indian Express, and Deccan Herald. Use only sources you're authorized to collect and reuse. The Reddit collector relies on the legacy `snscrape` integration; live access is not verified.
 
 ## Quickstart
+
+Start with Python 3.11, the version the repository's Dockerfile targets. The first run may download NLP models and NLTK resources even when live scraping is off.
 
 ```bash
 python -m venv .venv
@@ -16,7 +23,7 @@ python -m spacy download en_core_web_sm
 
 ```bash
 make test          # run the tiny pytest suite
-make run           # fast pipeline using sample data
+ENABLE_BERTOPIC=0 make run  # use the bundled fixtures; skip optional BERTopic
 ```
 
 ### Full pipeline
@@ -52,19 +59,19 @@ python index_search.py --query "waste management" --city "Bengaluru" --k 5
 
 ## Configuration
 
-Adjust settings in `config.py`. Environment variables (see `.env.example`) override defaults for proxies, scraping, and enabling full runs.
+Adjust settings in `config.py` or set shell environment variables such as `REDDIT_QUERY`, `REDDIT_LIMIT`, `HTTP_PROXY`, and `HTTPS_PROXY`. Use `FAST_MODE=0` or `make full` for live scraping.
 
 ## Troubleshooting
 
 - **FAISS/HDBSCAN build issues**: install system deps (`libopenblas-dev`, `build-essential`). In Docker use `apt-get update && apt-get install -y build-essential libopenblas-dev` before pip install.
 - **spaCy models**: ensure `python -m spacy download en_core_web_sm`. For transformer model, install `en_core_web_trf` and set `SPACY_MODEL_TRF` in `.env`.
-- **snscrape errors**: upgrade with `pip install --upgrade snscrape`.
+- **Live Reddit errors**: use sample mode for local development; updating the pinned scraper is not a verified fix.
 - **SentenceTransformers downloads**: ensure network access; otherwise pre-download models and place in `models/`.
 
 ## Testing strategy
 
 - `pytest -q`: runs against sample parquet data (`data/sample`).
-- Heavy steps (BERTopic, live scraping) are skipped when `FAST_MODE=1` (default). Pass `FAST_MODE=0` or `--full` to enable.
+- `FAST_MODE=1` (default) skips live scraping, not all model stages. Set `ENABLE_BERTOPIC=0` to explicitly skip BERTopic.
 
 ## Data outputs
 
